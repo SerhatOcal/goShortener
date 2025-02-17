@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>URL Kısaltıcı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-gradient-from: #667eea;
+            --bg-gradient-to: #764ba2;
+            --bg-container: rgba(255, 255, 255, 0.95);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --border-color: #e2e8f0;
+            --input-bg: #fff;
+            --qr-bg: #f8fafc;
+            --button-hover: #edf2f7;
+            --success-color: #48bb78;
+            --error-color: #e53e3e;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient-from: #1a202c;
+            --bg-gradient-to: #2d3748;
+            --bg-container: rgba(26, 32, 44, 0.95);
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --border-color: #4a5568;
+            --input-bg: #2d3748;
+            --qr-bg: #2d3748;
+            --button-hover: #4a5568;
+            --success-color: #48bb78;
+            --error-color: #fc8181;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-from) 0%, var(--bg-gradient-to) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--bg-container);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+
+        .theme-switch:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        input[type="url"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result p {
+            margin: 10px 0;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .result a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .result a:hover {
+            color: #764ba2;
+        }
+
+        .error {
+            color: #e53e3e !important;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive tasarım */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            input[type="url"], button {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+
+        /* Loading animasyonu */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .copy-button {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: #4a5568;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .copy-button:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        .copy-success {
+            background: #48bb78 !important;
+            color: white !important;
+            border-color: #48bb78 !important;
+        }
+
+        .url-container {
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            text-align: center;
+        }
+
+        .url-text {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .qr-code {
+            margin: 10px auto;
+            padding: 15px;
+            background: #FFFFFF;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .qr-code img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .qr-container .action-button {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+
+        .action-button {
+            background: var(--button-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 120px;
+        }
+
+        .action-button:hover {
+            background: var(--bg-gradient-from);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .history-section {
+            margin-top: 30px;
+            border-top: 2px solid var(--border-color);
+            padding-top: 20px;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-header h2 {
+            color: var(--text-primary);
+            font-size: 1em;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .clear-history {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            width: auto;
+            min-width: 150px;
+        }
+
+        .clear-history:hover {
+            background: var(--button-hover);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .clear-history:active {
+            transform: translateY(0);
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .history-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .history-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .history-item .url-container {
+            flex-direction: column;
+            background: none;
+            padding: 0;
+            margin: 0;
+            gap: 15px;
+        }
+
+        .history-item .url-text {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .history-item .url-text p {
+            margin: 0;
+        }
+
+        .history-item .url-text small {
+            color: var(--text-secondary);
+            font-size: 0.85em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-item .action-buttons {
+            width: 100%;
+            justify-content: flex-end;
+            margin: 0;
+        }
+
+        .history-item .action-button {
+            padding: 8px 15px;
+            font-size: 13px;
+            min-width: 100px;
+        }
+
+        .no-history {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 30px;
+            font-style: italic;
+            background: var(--input-bg);
+            border-radius: 10px;
+            border: 1px dashed var(--border-color);
+        }
+
+        .result p {
+            color: var(--text-primary);
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .result a {
+            color: var(--bg-gradient-from);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .result a:hover {
+            color: var(--bg-gradient-to);
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .share-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            color: white;
+        }
+
+        .share-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .share-button.twitter {
+            background: #1DA1F2;
+        }
+
+        .share-button.facebook {
+            background: #4267B2;
+        }
+
+        .share-button.whatsapp {
+            background: #25D366;
+        }
+
+        .share-button.telegram {
+            background: #0088cc;
+        }
+
+        .url-container {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .url-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal {
+            background: var(--bg-container);
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-title {
+            color: var(--text-primary);
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-content {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+
+        .modal-button.confirm {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .modal-button.cancel {
+            background: var(--button-hover);
+            color: var(--text-secondary);
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-switch" onclick="toggleTheme()" id="themeSwitch">🌞</button>
+    <div class="container">
+        <h1>URL Kısaltıcı</h1>
+        <div class="input-group">
+            <input type="url" id="urlInput" placeholder="https://example.com" 
+                   onkeypress="if(event.key === 'Enter') shortenURL()">
+            <button onclick="shortenURL()" id="shortenButton">URL'yi Kısalt</button>
+        </div>
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+        </div>
+        <div id="result" class="result"></div>
+        <div class="history-section">
+            <div class="history-header">
+                <button class="clear-history" onclick="clearHistory()">Geçmişi Temizle</button>
+            </div>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal">
+            <h3 class="modal-title">Geçmişi Temizle</h3>
+            <p class="modal-content">URL geçmişini temizlemek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+            <div class="modal-buttons">
+                <button class="modal-button cancel" onclick="closeModal()">İptal</button>
+                <button class="modal-button confirm" onclick="confirmClearHistory()">Temizle</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tema yönetimi
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            const themeSwitch = document.getElementById('themeSwitch');
+            themeSwitch.textContent = theme === 'dark' ? '🌞' : '🌙';
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        // Sayfa yüklendiğinde tema tercihini kontrol et
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            updateHistoryDisplay();
+        });
+
+        async function shortenURL() {
+            const urlInput = document.getElementById('urlInput');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            const button = document.getElementById('shortenButton');
+            
+            if (!urlInput.value) {
+                resultDiv.innerHTML = `<p class="error">Lütfen bir URL girin</p>`;
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                resultDiv.style.display = 'none';
+                loadingDiv.style.display = 'block';
+                button.disabled = true;
+                
+                const response = await fetch('http://localhost/api/v1/urls', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: urlInput.value
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    const shortURL = `http://localhost/api/v1/urls/${data.data.short_code}`;
+                    resultDiv.innerHTML = `
+                        <div class="url-container">
+                            <div class="url-text">
+                                <p><strong>Kısa URL:</strong> <a href="${shortURL}" target="_blank">${shortURL}</a></p>
+                            </div>
+                            <div class="url-actions">
+                                <div class="action-buttons">
+                                    <button class="action-button" onclick="copyToClipboard(this, '${shortURL}')">
+                                        Kopyala
+                                    </button>
+                                </div>
+                                <div class="share-buttons">
+                                    <button class="share-button twitter" onclick="shareURL('twitter', '${shortURL}')" title="Twitter'da Paylaş">
+                                        <i class="fab fa-twitter"></i>
+                                    </button>
+                                    <button class="share-button facebook" onclick="shareURL('facebook', '${shortURL}')" title="Facebook'ta Paylaş">
+                                        <i class="fab fa-facebook-f"></i>
+                                    </button>
+                                    <button class="share-button whatsapp" onclick="shareURL('whatsapp', '${shortURL}')" title="WhatsApp'ta Paylaş">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                    <button class="share-button telegram" onclick="shareURL('telegram', '${shortURL}')" title="Telegram'da Paylaş">
+                                        <i class="fab fa-telegram-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="qr-container" id="qrContainer">
+                            <div id="qrCode" class="qr-code"></div>
+                            <button class="action-button" onclick="downloadQR()">QR Kodu İndir</button>
+                        </div>
+                        <p><strong>Orijinal URL:</strong> ${data.data.original_url}</p>
+                        <p><strong>Oluşturulma:</strong> ${new Date(data.data.created_at).toLocaleString()}</p>
+                        <p><strong>Geçerlilik:</strong> ${new Date(data.data.expires_at).toLocaleString()}</p>
+                    `;
+                    // QR kodu otomatik oluştur
+                    generateQR(shortURL);
+                    // URL'yi geçmişe kaydet
+                    saveToHistory({
+                        shortURL,
+                        originalURL: data.data.original_url,
+                        createdAt: data.data.created_at,
+                        expiresAt: data.data.expires_at
+                    });
+                } else {
+                    resultDiv.innerHTML = `<p class="error">Hata: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Hata: ${error.message}</p>`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                resultDiv.style.display = 'block';
+                button.disabled = false;
+            }
+        }
+
+        async function copyToClipboard(button, text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                button.textContent = 'Kopyalandı!';
+                button.classList.add('copy-success');
+                
+                setTimeout(() => {
+                    button.textContent = 'Kopyala';
+                    button.classList.remove('copy-success');
+                }, 2000);
+            } catch (err) {
+                console.error('Kopyalama başarısız:', err);
+                alert('Kopyalama başarısız: ' + err.message);
+            }
+        }
+
+        function generateQR(url) {
+            const qrContainer = document.getElementById('qrContainer');
+            const qrCode = document.getElementById('qrCode');
+            
+            // QR kodu temizle
+            qrCode.innerHTML = '';
+            
+            // Yeni QR kod oluştur
+            new QRCode(qrCode, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: "#2D3748",
+                colorLight: "#FFFFFF",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadQR() {
+            const img = document.querySelector('#qrCode img');
+            if (!img) return;
+
+            // QR kodunu PNG olarak indir
+            const link = document.createElement('a');
+            link.download = 'qr-code.png';
+            link.href = img.src;
+            link.click();
+        }
+
+        // Enter tuşu ile gönderme
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                shortenURL();
+            }
+        });
+
+        // URL Geçmişi Yönetimi
+        function saveToHistory(urlData) {
+            const history = JSON.parse(localStorage.getItem('urlHistory') || '[]');
+            history.unshift(urlData); // Yeni URL'yi başa ekle
+            if (history.length > 5) history.pop(); // Son 5 URL'yi tut
+            localStorage.setItem('urlHistory', JSON.stringify(history));
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            const clearButton = document.querySelector('.clear-history');
+            const history = JSON.parse(localStorage.getItem('urlHistory') || '[]');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="no-history">Henüz kısaltılmış URL bulunmuyor</div>';
+                clearButton.style.display = 'none';
+                return;
+            }
+
+            clearButton.style.display = 'block';
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="url-container">
+                        <div class="url-text">
+                            <p>
+                                <a href="${item.shortURL}" target="_blank">${item.shortURL}</a>
+                            </p>
+                            <small title="${item.originalURL}">Orijinal: ${item.originalURL}</small>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="action-button" onclick="copyToClipboard(this, '${item.shortURL}')">
+                                Kopyala
+                            </button>
+                            <button class="action-button" onclick="showQR('${item.shortURL}')">
+                                QR Kod
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function clearHistory() {
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function confirmClearHistory() {
+            localStorage.removeItem('urlHistory');
+            updateHistoryDisplay();
+            closeModal();
+        }
+
+        // Modal dışına tıklandığında kapatma
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESC tuşu ile modalı kapatma
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        function showQR(url) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <div class="qr-container" id="qrContainer">
+                    <div id="qrCode" class="qr-code"></div>
+                    <button class="action-button" onclick="downloadQR()">QR Kodu İndir</button>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+            generateQR(url);
+        }
+
+        function shareURL(platform, url) {
+            const text = 'Kısaltılmış linkimi kontrol edin:';
+            let shareURL;
+
+            switch(platform) {
+                case 'twitter':
+                    shareURL = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                    break;
+                case 'facebook':
+                    shareURL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    break;
+                case 'whatsapp':
+                    shareURL = `https://api.whatsapp.com/send?text=${encodeURIComponent(text + ' ' + url)}`;
+                    break;
+                case 'telegram':
+                    shareURL = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+                    break;
+            }
+
+            window.open(shareURL, '_blank', 'width=600,height=400');
+        }
+    </script>
+</body>
+</html> 
