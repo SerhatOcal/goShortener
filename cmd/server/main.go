@@ -22,7 +22,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-    pgConnStr := "postgresql://almadansorgula:15825270Se@localhost:5432/urlshortener?sslmode=disable"
+    pgConnStr := "postgresql://almadansorgula:15825270Se.!@localhost:5432/urlshortener?sslmode=disable"
 
 	// Redis bağlantı bilgileri
 	redisAddr := fmt.Sprintf("%s:%s",
