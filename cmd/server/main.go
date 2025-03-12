@@ -22,14 +22,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// PostgreSQL bağlantı bilgileri
-	pgConnStr := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s sslmode=disable",
-		"localhost",
-		"postgres",
-		"",
-		"urlshortener",
-	)
+    pgConnStr := "host=localhost user=postgres password="" dbname=urlshortener sslmode=disable"
 
 	// Redis bağlantı bilgileri
 	redisAddr := fmt.Sprintf("%s:%s",
