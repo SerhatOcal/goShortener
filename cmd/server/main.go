@@ -25,16 +25,16 @@ func main() {
 	// PostgreSQL bağlantı bilgileri
 	pgConnStr := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"),
+		"localhost",
+		"postgres",
+		"",
+		"urlshortener",
 	)
 
 	// Redis bağlantı bilgileri
 	redisAddr := fmt.Sprintf("%s:%s",
-		os.Getenv("REDIS_HOST"),
-		os.Getenv("REDIS_PORT"),
+		"localhost",
+		"6379",
 	)
 
 	// PostgreSQL storage'ı oluştur
@@ -129,4 +129,4 @@ func main() {
 	}
 
 	log.Println("Shutting down gracefully...")
-} 
+}
