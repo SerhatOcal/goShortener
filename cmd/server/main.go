@@ -22,7 +22,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-    pgConnStr := "postgresql://almadansorgula:15825270Se@localhost:5432/urlshortener?sslmode=disable"
+    pgConnStr := "postgresql://almadansorgula:15825270Se.!@localhost:5433/urlshortener?sslmode=disable"
 
 	// Redis bağlantı bilgileri
 	redisAddr := fmt.Sprintf("%s:%s",
@@ -86,13 +86,13 @@ func main() {
 
 	// HTTP sunucusunu oluştur
 	server := &http.Server{
-		Addr:    ":9090",
+		Addr:    ":8080",
 		Handler: mux,
 	}
 
 	// HTTP sunucusunu başlat
 	go func() {
-		log.Printf("HTTP server starting on :9090")
+		log.Printf("HTTP server starting on :8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("HTTP server failed: %v", err)
 		}
