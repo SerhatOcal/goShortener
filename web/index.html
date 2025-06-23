@@ -630,6 +630,7 @@
 
     <script>
         // Tema yönetimi
+        const apiBaseUrl = window.location.origin;
         function setTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
@@ -667,8 +668,8 @@
                 resultDiv.style.display = 'none';
                 loadingDiv.style.display = 'block';
                 button.disabled = true;
-                
-                const response = await fetch('http://localhost/api/v1/urls', {
+
+                const response = await fetch(`${apiBaseUrl}/api/v1/urls`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -679,9 +680,9 @@
                 });
 
                 const data = await response.json();
-                
+
                 if (data.success) {
-                    const shortURL = `http://localhost/api/v1/urls/${data.data.short_code}`;
+                    const shortURL = `${apiBaseUrl}/api/v1/urls/${data.data.short_code}`;
                     resultDiv.innerHTML = `
                         <div class="url-container">
                             <div class="url-text">
